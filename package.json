@@ -1,0 +1,116 @@
+{
+  "name": "linux-assistant",
+  "productName": "LinuxHelper",
+  "version": "0.1.0",
+  "description": "Linux 使用助手 — 面向 Windows 转 Linux 用户的 AI 桌面客户端",
+  "main": "src/main/main.js",
+  "author": {
+    "name": "WuRong",
+    "email": "katfionn.git@ccmail.uk",
+    "url": "https://github.com/katfionn"
+  },
+  "license": "MPL-2.0",
+  "homepage": "https://github.com/katfionn/linuxhelper",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "test": "node --test",
+    "smoke": "node tools/smoke.mjs",
+    "icon": "node tools/gen-icon.mjs",
+    "dist:linux": "electron-builder --linux AppImage deb pacman",
+    "dist:dir": "electron-builder --dir",
+    "env:status": "node tools/envpack.mjs status",
+    "env:pack": "node tools/envpack.mjs pack",
+    "env:restore": "node tools/envpack.mjs restore",
+    "env:purge": "node tools/envpack.mjs purge",
+    "dist:linux:portable": "electron-builder --linux dir --x64 --publish never && node tools/pack-linux-portable.mjs"
+  },
+  "devDependencies": {
+    "electron": "^45.3.1",
+    "electron-builder": "^26.18.0",
+    "tar": "^7.5.23"
+  },
+  "build": {
+    "appId": "local.linuxhelper.assistant",
+    "productName": "LinuxHelper",
+    "copyright": "Copyright © 2026 WuRong (GitHub: @Katfionn)",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "data/**/*",
+      "package.json",
+      "!**/*.map"
+    ],
+    "extraResources": [
+      {
+        "from": "data",
+        "to": "data"
+      },
+      {
+        "from": "build/icon.png",
+        "to": "icon.png"
+      },
+      { "from": "LICENSE",
+      "to": "LICENSE"
+      }
+    ],
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "pacman",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "Utility",
+      "icon": "build/icon.png",
+      "synopsis": "面向 Windows 转 Linux 用户的 AI 桌面助手",
+      "description": "Linux 使用助手：知识库、每日技巧、应用市场、文件查找、个性化与 AI 系统管理，所有缓存与依赖都保存在用户家目录内。",
+      "maintainer": "WuRong katfionn.git@ccmail.uk",
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "desktop": {
+        "entry": {
+          "Name": "Linux 使用助手",
+          "Comment": "AI 驱动的 Linux 桌面助手",
+          "Categories": "Utility;System;"
+        }
+      },
+      "executableName": "linuxhelper"
+    },
+    "deb": {
+      "depends": [
+        "libgtk-3-0",
+        "libnotify4",
+        "libnss3",
+        "libxss1",
+        "libxtst6",
+        "xdg-utils",
+        "libatspi2.0-0",
+        "libuuid1",
+        "libsecret-1-0"
+      ]
+    },
+    "appImage": {
+      "artifactName": "${productName}-${version}-${arch}.AppImage"
+    }
+  }
+}

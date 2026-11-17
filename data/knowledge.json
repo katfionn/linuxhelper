@@ -1,0 +1,301 @@
+{
+  "schema": "linux-helper-knowledge/v1",
+  "categories": [
+    { "id": "start", "name": "新手入门", "icon": "🐣", "description": "从 Windows 过来最先要搞懂的几件事" },
+    { "id": "terminal", "name": "终端基础", "icon": "⌨️", "description": "命令、权限与常用工具" },
+    { "id": "software", "name": "软件管理", "icon": "📦", "description": "apt / pacman / Flatpak / AppImage" },
+    { "id": "files", "name": "文件与磁盘", "icon": "🗂️", "description": "目录结构、权限、U 盘挂载" },
+    { "id": "desktop", "name": "桌面定制", "icon": "🎨", "description": "桌面环境、主题、输入法、字体" },
+    { "id": "network", "name": "网络与安全", "icon": "🌐", "description": "诊断网络、代理与基本安全" },
+    { "id": "rescue", "name": "故障排查", "icon": "🛠️", "description": "卡死、启动失败与备份恢复" }
+  ],
+  "articles": [
+    {
+      "id": "filesystem",
+      "title": "Linux 的文件系统长什么样？和 Windows 有什么不同",
+      "category": "start",
+      "level": "入门",
+      "readMinutes": 4,
+      "tags": ["目录", "Windows", "基础"],
+      "summary": "Linux 没有 C 盘 D 盘，所有东西都挂在根目录 / 下面。搞懂几个关键目录，你就不会再找不到文件了。",
+      "body": "Windows 里用「C 盘、D 盘」划分存储，Linux 只有一个根目录 `/`，所有硬盘、U 盘都挂载在它下面的某个文件夹里。\n\n你真正需要关心的是这几个目录：\n\n- `/home/你的用户名` —— 你的个人文件，相当于 Windows 的「用户文件夹」，缩写为 `~`\n- `/etc` —— 系统与应用配置，改配置基本都在这里\n- `/var/log` —— 日志，出问题先来这里看\n- `/usr/bin` —— 系统安装的程序\n- `/mnt` 和 `/media` —— 临时挂载的硬盘、U 盘\n- `/tmp` —— 临时文件，重启可能被清空\n\n一个重要的思维转换：**Linux 不按「盘符」组织，而按「用途」组织**。软件不是装在某个盘里，而是把文件分散放到 `/usr`、`/etc`、`/var` 等位置，由包管理器统一记录。\n\n隐藏文件以点开头（如 `.bashrc`），在文件管理器里按 `Ctrl + H` 显示。",
+      "commands": [
+        { "desc": "查看当前所在目录", "cmd": "pwd" },
+        { "desc": "列出当前目录内容（含隐藏文件）", "cmd": "ls -la" },
+        { "desc": "进入你的主目录", "cmd": "cd ~" }
+      ]
+    },
+    {
+      "id": "terminal-basics",
+      "title": "终端常用命令速查：20 个命令覆盖 90% 场景",
+      "category": "terminal",
+      "level": "入门",
+      "readMinutes": 5,
+      "tags": ["命令", "终端", "速查"],
+      "summary": "不用背，先认识这 20 条。需要时回来查即可，日常操作也可以让 AI 助手帮你生成命令。",
+      "body": "Linux 的终端就像 Windows 的「命令提示符」，但更强大。打开方式：`Ctrl + Alt + T`（大多数桌面）。\n\n**查看与移动**\n- `pwd` 我现在在哪\n- `ls -la` 列出所有文件（含隐藏）\n- `cd 目录` 进入目录，`cd ..` 返回上一级\n- `cat 文件` 查看文件内容\n- `less 文件` 分页查看大文件，按 q 退出\n\n**文件操作**\n- `cp 源 目标` 复制，`cp -r` 复制文件夹\n- `mv 源 目标` 移动或重命名\n- `rm 文件` 删除（不进回收站！），`rm -rf 文件夹` 递归删除\n- `mkdir -p a/b/c` 一次性创建多级目录\n- `find . -name \"*.pdf\"` 按名字找文件\n\n**系统与进程**\n- `sudo 命令` 以管理员身份执行\n- `htop` 图形化查看进程（需安装）\n- `df -h` 查看磁盘空间\n- `free -h` 查看内存\n- `uname -a` 查看内核版本\n- `systemctl status 服务名` 查看服务状态\n- `journalctl -xe` 查看最近的系统日志\n\n**软件**\n- `apt install 包名`（Debian/Ubuntu）或 `pacman -S 包名`（Arch）\n- `apt search 关键字` 搜索软件\n\n小技巧：按 `Tab` 自动补全，按 `↑` 调出历史命令，`Ctrl + R` 搜索历史命令。",
+      "commands": [
+        { "desc": "查看磁盘剩余空间", "cmd": "df -h" },
+        { "desc": "查看内存占用", "cmd": "free -h" },
+        { "desc": "查找名字包含 report 的文件", "cmd": "find ~ -iname \"*report*\" 2>/dev/null | head -20" }
+      ]
+    },
+    {
+      "id": "sudo",
+      "title": "sudo 是什么？为什么 Linux 老是要我输密码",
+      "category": "start",
+      "level": "入门",
+      "readMinutes": 3,
+      "tags": ["sudo", "权限", "安全"],
+      "summary": "Linux 默认不让你直接用管理员账号，而是用 sudo 临时提权。这是保护机制，不是故意为难你。",
+      "body": "Windows 用「用户账户控制（UAC）」弹窗确认管理员操作，Linux 用 `sudo`：在命令前面加 sudo，输入你自己的密码，就以 root 权限执行这一条命令。\n\n- 输入密码时**屏幕上不会显示任何字符**（连星号都没有），这是正常现象，输完直接回车。\n- 默认 15 分钟内再次 sudo 不用重复输密码。\n- 密码是你**当前用户的登录密码**，不是 root 密码。\n- 不要用 `sudo` 跑普通命令，只在需要修改系统文件、安装软件时使用。\n- 图形界面里安装软件时，弹出的授权窗口叫 polkit，本质和 sudo 一样。\n\n危险操作提醒：`sudo rm -rf /` 会删掉整个系统。看到不认识的命令带 `sudo`，先问清楚再执行——也可以直接问 AI 助手。",
+      "commands": [
+        { "desc": "查看当前用户属于哪些组", "cmd": "groups" },
+        { "desc": "以管理员身份更新软件源（Debian/Ubuntu）", "cmd": "sudo apt update" },
+        { "desc": "查看最近一次 sudo 记录", "cmd": "sudo -l" }
+      ]
+    },
+    {
+      "id": "install-ways",
+      "title": "Linux 装软件的四种方式，到底该选哪个",
+      "category": "software",
+      "level": "入门",
+      "readMinutes": 5,
+      "tags": ["安装", "apt", "Flatpak", "AppImage"],
+      "summary": "软件源、Flatpak、AppImage、自行编译——新手优先用前两种，遇到绿色版软件用 AppImage。",
+      "body": "Windows 里下载 exe 双击安装，Linux 有四种主流方式：\n\n**1. 系统软件源（推荐）**\n通过 `apt` / `pacman` / `dnf` 安装，自动处理依赖、统一更新。缺点是新版软件上架慢。\n\n**2. Flatpak（推荐给第三方软件）**\n沙箱应用，跨发行版通用，版本新。首次使用需要启用 Flathub：\n`flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo`\n\n**3. AppImage（绿色版）**\n单文件，下载后右键属性勾选「允许作为程序执行」，双击即可运行。不需要安装，删掉文件就卸载。\n\n**4. 源码编译 / deb 包**\n最后的选择。`.deb` 可以用 `sudo apt install ./xxx.deb` 安装，但容易出现依赖问题。\n\n**怎么选？**\n- 系统工具、驱动、开发库 → 软件源\n- 聊天、设计、媒体类第三方应用 → Flatpak\n- 官网只提供单文件的工具 → AppImage\n\n安装任何东西前，先在本应用的「应用市场」搜一下，大部分常用软件已经配好了来源。",
+      "commands": [
+        { "desc": "启用 Flathub 应用源", "cmd": "flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo" },
+        { "desc": "用 Flatpak 安装 VLC", "cmd": "flatpak install flathub org.videolan.VLC" },
+        { "desc": "给 AppImage 添加执行权限", "cmd": "chmod +x ~/Downloads/SomeApp.AppImage" }
+      ]
+    },
+    {
+      "id": "apt-guide",
+      "title": "APT 完全指南（Debian / Ubuntu / Mint）",
+      "category": "software",
+      "level": "进阶",
+      "readMinutes": 5,
+      "tags": ["apt", "debian", "ubuntu"],
+      "summary": "更新、搜索、安装、卸载、清理，一条命令一个场景。",
+      "body": "APT 是 Debian 系的包管理器，Ubuntu、Linux Mint、Pop!_OS 都用它。\n\n**基本流程**\n1. `sudo apt update` 刷新软件源索引（不升级软件）\n2. `apt search 关键字` 搜索\n3. `sudo apt install 包名` 安装\n4. `sudo apt upgrade` 升级已安装软件\n\n**卸载的三种程度**\n- `sudo apt remove 包名` 卸载但保留配置\n- `sudo apt purge 包名` 连配置文件一起删除\n- `sudo apt autoremove` 清理不再被依赖的孤儿包\n\n**常见问题**\n- 提示「Unable to locate package」：先 `sudo apt update`，或包名不对（用 search 查）\n- 提示锁被占用：可能有其他更新在跑，等它结束，或重启\n- 依赖冲突：先 `sudo apt --fix-broken install`\n\n**看信息**\n- `apt show 包名` 版本、大小、依赖\n- `apt list --installed | grep 关键字` 查是否已安装\n- `apt list --upgradable` 查看可升级的包",
+      "commands": [
+        { "desc": "刷新软件源", "cmd": "sudo apt update" },
+        { "desc": "安装并自动确认", "cmd": "sudo apt install -y 包名" },
+        { "desc": "修复损坏的依赖", "cmd": "sudo apt --fix-broken install" },
+        { "desc": "清理无用依赖", "cmd": "sudo apt autoremove --purge" }
+      ]
+    },
+    {
+      "id": "pacman-guide",
+      "title": "Pacman 完全指南（Arch / Manjaro / EndeavourOS）",
+      "category": "software",
+      "level": "进阶",
+      "readMinutes": 4,
+      "tags": ["pacman", "arch", "manjaro"],
+      "summary": "Arch 系用 pacman，注意 -Sy 与 -Syu 的区别，不要只同步不升级。",
+      "body": "Arch 系的包管理器。参数组合有规律：`-S` 同步安装，`-R` 卸载，`-Q` 查询，`-U` 本地安装。\n\n**常用命令**\n- `sudo pacman -Syu` 同步源并升级整个系统（最常用）\n- `sudo pacman -S 包名` 安装\n- `sudo pacman -Ss 关键字` 搜索\n- `sudo pacman -Rns 包名` 卸载并清理不需要的依赖\n- `pacman -Q` 列出已安装，`pacman -Qe` 只列手动安装的\n- `pacman -Qdtq` 列出孤儿包，配合 `-Rns` 删除\n\n**重要提醒**\n不要执行 `pacman -Sy 包名`（只同步不升级），这会造成「部分升级」从而损坏系统。要么 `-Syu`，要么先 `-Syu` 再安装。\n\n**AUR**\n官方仓库没有的软件在 AUR（Arch 用户仓库），需要一个 AUR helper，如 `yay` 或 `paru`：\n`sudo pacman -S --needed base-devel git` 然后按 yay 官方说明安装。\n\n**清理缓存**\n`sudo pacman -Sc` 清理未安装包的缓存，`paccache -rk1` 只保留最近一个版本。",
+      "commands": [
+        { "desc": "全系统升级", "cmd": "sudo pacman -Syu" },
+        { "desc": "查看孤儿包", "cmd": "pacman -Qdtq" },
+        { "desc": "删除孤儿包", "cmd": "sudo pacman -Rns $(pacman -Qdtq)" }
+      ]
+    },
+    {
+      "id": "flatpak-appimage",
+      "title": "Flatpak 与 AppImage 有什么区别，该用哪个",
+      "category": "software",
+      "level": "进阶",
+      "readMinutes": 4,
+      "tags": ["flatpak", "appimage", "沙箱"],
+      "summary": "Flatpak 是「带运行时的应用商店」，AppImage 是「免安装单文件」。一个便于管理，一个便于携带。",
+      "body": "**Flatpak**\n- 应用运行在沙箱中，依赖共享运行时，体积更省\n- 通过 Flathub 统一分发，跨发行版一致\n- 权限需要显式授予，可用 Flatseal 图形化管理\n- 首次运行会下载运行时，之后启动快\n- 命令：`flatpak list`、`flatpak update`、`flatpak uninstall 应用ID`\n\n**AppImage**\n- 单文件，下载即可运行，不需要 root 权限\n- 依赖打包在内部，兼容性最好\n- 不自动更新（部分应用内置更新器）\n- 需要手动加执行权限：`chmod +x xxx.AppImage`\n- 部分系统需要安装 FUSE：`sudo apt install libfuse2`\n\n**选择建议**\n长期使用的第三方软件用 Flatpak（自动更新、可管理）；临时试用、便携工具用 AppImage。\n\n如果 Flatpak 应用读不到你的文件（比如无法选择下载目录），用 Flatseal 给它授予文件系统权限即可。",
+      "commands": [
+        { "desc": "查看已安装的 Flatpak 应用", "cmd": "flatpak list --app" },
+        { "desc": "更新全部 Flatpak 应用", "cmd": "flatpak update -y" },
+        { "desc": "卸载 Flatpak 应用", "cmd": "flatpak uninstall -y 应用ID" }
+      ]
+    },
+    {
+      "id": "permissions",
+      "title": "文件权限入门：为什么我改不了这个文件",
+      "category": "files",
+      "level": "进阶",
+      "readMinutes": 4,
+      "tags": ["权限", "chmod", "chown"],
+      "summary": "看到 Permission denied 时，先看所有者与权限位，而不是无脑 sudo。",
+      "body": "`ls -l` 输出的第一列像 `-rw-r--r--`，含义是：\n\n- 第 1 位：`-` 普通文件，`d` 目录，`l` 链接\n- 接下来 3 位：所有者权限\n- 中间 3 位：所属组权限\n- 最后 3 位：其他人权限\n- `r` 读（4）、`w` 写（2）、`x` 执行（1）\n\n**常见场景**\n- 改自己的文件：一般不需要 sudo\n- 改系统配置：`sudo nano /etc/xxx`\n- 脚本无法执行：`chmod +x script.sh`\n- 家里目录被 root 占用导致普通程序无法写入：`sudo chown -R $USER:$USER ~/某目录`\n\n**数字法**\n`chmod 755 文件` = 所有者 rwx，其他人 r-x。`chmod 644 文件` = 所有者读写，其他人只读。\n\n**不要做的事**\n不要 `sudo chmod -R 777 /`，这会让系统失去安全边界，也解决不了根本问题。\n\n图形界面里，右键文件 → 属性 → 权限，也可以修改。",
+      "commands": [
+        { "desc": "查看文件权限", "cmd": "ls -l 文件名" },
+        { "desc": "给脚本添加执行权限", "cmd": "chmod +x 脚本.sh" },
+        { "desc": "把目录所有权改回自己", "cmd": "sudo chown -R $USER:$USER ~/目录名" }
+      ]
+    },
+    {
+      "id": "usb-mount",
+      "title": "U 盘 / 移动硬盘插上没反应怎么办",
+      "category": "files",
+      "level": "入门",
+      "readMinutes": 3,
+      "tags": ["U盘", "挂载", "NTFS"],
+      "summary": "先用 lsblk 确认系统有没有识别到设备，再决定是挂载还是装驱动。",
+      "body": "**第一步：确认是否识别**\n插上 U 盘后运行 `lsblk`，看看有没有新增的 `sdX` 设备。没有的话是硬件或接口问题，换个口试试。\n\n**第二步：看文件系统类型**\n`lsblk -f` 会显示 `ntfs`、`exfat`、`vfat` 等。\n- exFAT：安装 `exfat-fuse exfatprogs`\n- NTFS：安装 `ntfs-3g`\n- 加密盘：需要先解锁\n\n**第三步：手动挂载**\n```\nsudo mkdir -p /mnt/usb\nsudo mount /dev/sdb1 /mnt/usb\n```\n用完卸载：`sudo umount /mnt/usb`（不要在写入时直接拔）。\n\n**图形界面更简单**\nGNOME / KDE 文件管理器左侧通常会自动出现设备，点击即可。若提示「无法挂载」，多半是缺少 exfat/ntfs 驱动或文件系统损坏。\n\n**注意**\nmacOS 的 APFS、Windows 的 BitLocker 加密盘在 Linux 上默认无法直接读取。",
+      "commands": [
+        { "desc": "列出所有块设备", "cmd": "lsblk -f" },
+        { "desc": "安装 exFAT 与 NTFS 支持", "cmd": "sudo apt install exfat-fuse exfatprogs ntfs-3g" },
+        { "desc": "查看最近的挂载错误", "cmd": "journalctl -b | grep -i mount | tail -20" }
+      ]
+    },
+    {
+      "id": "desktop-env",
+      "title": "GNOME、KDE、Xfce 怎么选？桌面环境扫盲",
+      "category": "desktop",
+      "level": "入门",
+      "readMinutes": 4,
+      "tags": ["GNOME", "KDE", "Xfce", "桌面"],
+      "summary": "GNOME 简洁、KDE 可定制、Xfce 轻量。Windows 用户通常更容易上手 KDE 或 Cinnamon。",
+      "body": "桌面环境（DE）决定了你的任务栏、窗口、设置界面的样子。常见几种：\n\n**GNOME**（Ubuntu、Fedora 默认）\n- 简洁、触控友好、扩展生态丰富\n- 默认操作逻辑与 Windows 差别大，需要适应\n- 资源占用中等\n\n**KDE Plasma**（Kubuntu、Manjaro KDE）\n- 最像 Windows：任务栏、开始菜单、托盘一应俱全\n- 可定制程度极高，设置项非常多\n- 功能丰富但初次配置略复杂\n\n**Cinnamon**（Linux Mint 默认）\n- 传统 Windows 7 式布局，迁移成本最低\n- 稳定、少折腾\n\n**Xfce / LXQt**\n- 极轻量，老电脑救星\n- 界面朴素，功能够用\n\n**怎么换？**\n可以在登录界面切换已安装的桌面环境；彻底更换建议直接重装对应发行版版本，避免配置冲突。\n\n本应用的「个性化」市场会根据你当前的桌面环境自动选择可用的主题与图标。",
+      "commands": [
+        { "desc": "查看当前桌面环境", "cmd": "echo $XDG_CURRENT_DESKTOP" },
+        { "desc": "查看会话类型（Wayland/X11）", "cmd": "echo $XDG_SESSION_TYPE" },
+        { "desc": "安装 KDE 桌面（Debian/Ubuntu）", "cmd": "sudo apt install kde-plasma-desktop" }
+      ]
+    },
+    {
+      "id": "themes",
+      "title": "给 Linux 换个好看的桌面：主题与图标包",
+      "category": "desktop",
+      "level": "入门",
+      "readMinutes": 3,
+      "tags": ["主题", "图标", "美化"],
+      "summary": "主题装到 ~/.local/share/themes，图标装到 ~/.local/share/icons，然后用 gsettings 应用。",
+      "body": "Linux 桌面可以深度定制，基本三件套：**GTK 主题**（窗口与控件）、**图标包**、**光标**。\n\n**安装位置（只影响当前用户，不需要 root）**\n- 主题：`~/.local/share/themes/主题名`\n- 图标：`~/.local/share/icons/图标名`\n- 光标：同样放在 icons 目录\n\n**应用方式**\nGNOME / Cinnamon / MATE 用 gsettings，Xfce 用 xfconf，KDE 用系统设置。\n\n**注意**\n- 主题需要与 GNOME 版本匹配，太旧的主题可能显示异常\n- Flatpak 应用可能不跟随系统主题，需要安装对应运行时主题\n- 更换后部分应用需要重启才生效\n\n最简单的方式：在本应用「应用市场 → 个性化」里挑选并一键应用，无需记命令。",
+      "commands": [
+        { "desc": "查看当前 GTK 主题", "cmd": "gsettings get org.gnome.desktop.interface gtk-theme" },
+        { "desc": "切换 GTK 主题", "cmd": "gsettings set org.gnome.desktop.interface gtk-theme 'Arc-Dark'" },
+        { "desc": "切换图标主题", "cmd": "gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark'" }
+      ]
+    },
+    {
+      "id": "input-method",
+      "title": "中文输入法配置：fcitx5 从安装到能用",
+      "category": "desktop",
+      "level": "进阶",
+      "readMinutes": 5,
+      "tags": ["输入法", "中文", "fcitx5"],
+      "summary": "装完还要设置环境变量并重启会话，否则很多应用里打不出中文。",
+      "body": "**安装**\nDebian/Ubuntu：`sudo apt install fcitx5 fcitx5-chinese-addons`\nArch：`sudo pacman -S fcitx5 fcitx5-chinese-addons fcitx5-configtool`\n\n**设置环境变量**（写入 `~/.profile` 或 `~/.pam_environment`）\n```\nexport GTK_IM_MODULE=fcitx\nexport QT_IM_MODULE=fcitx\nexport XMODIFIERS=@im=fcitx\nexport SDL_IM_MODULE=fcitx\n```\nWayland 下 GTK_IM_MODULE 建议设为 `wayland` 或留空由系统处理。\n\n**添加到自启动**\n`fcitx5` 需要开机自启。GNOME 可在「启动应用程序」中添加；KDE 在「自动启动」中添加。\n\n**配置输入法**\n运行 `fcitx5-configtool`，在「输入法」页添加「拼音」。\n\n**常见问题**\n- 只有部分应用能输入：环境变量没生效，注销重新登录\n- 完全不出候选框：fcitx5 没在运行，检查自启动\n- Electron 应用（VS Code 等）需要 `--enable-wayland-ime` 或设置 GTK_IM_MODULE=fcitx",
+      "commands": [
+        { "desc": "安装 fcitx5 与中文组件", "cmd": "sudo apt install -y fcitx5 fcitx5-chinese-addons fcitx5-configtool" },
+        { "desc": "打开输入法配置", "cmd": "fcitx5-configtool" },
+        { "desc": "检查环境变量是否生效", "cmd": "echo $GTK_IM_MODULE $QT_IM_MODULE $XMODIFIERS" }
+      ]
+    },
+    {
+      "id": "hidpi-font",
+      "title": "屏幕字太小 / 发虚：缩放与字体优化",
+      "category": "desktop",
+      "level": "进阶",
+      "readMinutes": 4,
+      "tags": ["HiDPI", "缩放", "字体"],
+      "summary": "高分屏优先用 Wayland，GNOME 用 fractional scaling，字体发虚多半是缺中文字体和 hinting 设置。",
+      "body": "**整体缩放**\n- GNOME：设置 → 显示 → 缩放，或 `gsettings set org.gnome.desktop.interface text-scaling-factor 1.25`\n- KDE：设置 → 显示与监视器 → 全局缩放（Wayland 支持分数缩放）\n- Xfce：设置 → 外观 → 窗口缩放\n\n**只放大字体**\nGNOME：`gsettings set org.gnome.desktop.interface text-scaling-factor 1.2`\n\n**字体发虚**\n1. 安装中文字体：`sudo apt install fonts-noto-cjk fonts-noto-color-emoji`\n2. 刷新字体缓存：`fc-cache -fv`\n3. 调整渲染（仅 X11）：\n```\ngsettings set org.gnome.settings-daemon.plugins.xsettings antialiasing 'rgba'\ngsettings set org.gnome.settings-daemon.plugins.xsettings hinting 'slight'\n```\n\n**应用单独缩放**\nElectron 应用可在启动参数加 `--force-device-scale-factor=1.25`；本应用可在「设置 → 界面缩放」调整。\n\nWayland 下缩放体验普遍好于 X11，新版桌面建议优先使用 Wayland 会话。",
+      "commands": [
+        { "desc": "安装中文字体与 emoji 字体", "cmd": "sudo apt install -y fonts-noto-cjk fonts-noto-color-emoji" },
+        { "desc": "刷新字体缓存", "cmd": "fc-cache -fv" },
+        { "desc": "设置字体缩放 1.2 倍", "cmd": "gsettings set org.gnome.desktop.interface text-scaling-factor 1.2" }
+      ]
+    },
+    {
+      "id": "network-diag",
+      "title": "网络连不上？5 条命令定位问题",
+      "category": "network",
+      "level": "进阶",
+      "readMinutes": 4,
+      "tags": ["网络", "DNS", "诊断"],
+      "summary": "从「有没有网卡」到「DNS 解析」逐层排查，比反复重启有效。",
+      "body": "按顺序排查：\n\n**1. 网卡是否存在、是否启用**\n`ip a` —— 看有没有 `state UP` 的网卡。\n\n**2. 是否拿到 IP**\n`ip a` 里看是否分配了 192.168.x.x / 10.x.x.x 地址。没有就是 DHCP 问题。\n\n**3. 网关是否通**\n`ip route` 查看默认网关，然后 `ping 网关IP`。\n\n**4. 外网 IP 是否通**\n`ping 1.1.1.1`（绕过 DNS）。通但域名打不开 → DNS 问题。\n\n**5. DNS 是否正常**\n`resolvectl status` 或 `cat /etc/resolv.conf`。\n可以临时改成公共 DNS：`sudo resolvectl dns 网卡名 223.5.5.5 119.29.29.29`。\n\n**其他常见原因**\n- 开了代理但代理挂了：`env | grep -i proxy` 检查\n- 无线网卡驱动缺失：`lspci -k | grep -A3 -i network`\n- 校园网/公司网需要认证页面",
+      "commands": [
+        { "desc": "查看网卡与 IP", "cmd": "ip a" },
+        { "desc": "查看默认网关", "cmd": "ip route" },
+        { "desc": "测试 DNS 解析", "cmd": "getent hosts www.baidu.com" },
+        { "desc": "查看 DNS 配置", "cmd": "resolvectl status 2>/dev/null || cat /etc/resolv.conf" }
+      ]
+    },
+    {
+      "id": "proxy",
+      "title": "代理设置：让终端和应用都能走代理",
+      "category": "network",
+      "level": "进阶",
+      "readMinutes": 3,
+      "tags": ["代理", "网络", "环境变量"],
+      "summary": "图形应用跟随系统代理，终端需要单独设置环境变量；本应用的 AI 请求可在设置里单独配置。",
+      "body": "**终端代理（临时）**\n```\nexport https_proxy=http://127.0.0.1:7890\nexport http_proxy=http://127.0.0.1:7890\nexport all_proxy=socks5://127.0.0.1:7890\n```\n写入 `~/.bashrc` 可长期生效（不要写死一个没运行的代理，否则所有命令都会卡）。\n\n**系统代理**\n- GNOME：设置 → 网络 → 网络代理\n- KDE：设置 → 网络 → 代理\n- 命令行：`gsettings set org.gnome.system.proxy mode 'manual'` 等\n\n**Flatpak 应用**\nFlatpak 默认无法访问 127.0.0.1 的代理，需要：\n`flatpak override --user --env=ALL_PROXY=http://127.0.0.1:7890 应用ID`\n或在 Flatseal 中开放网络。\n\n**本应用**\n设置 → 通用 → 网络代理，填写 `http://127.0.0.1:7890`，AI 请求与扩展源拉取都会走它。\n\n**排查**\n`curl -I https://www.google.com` 看是否真的走了代理；`env | grep -i proxy` 确认变量。",
+      "commands": [
+        { "desc": "临时设置终端代理", "cmd": "export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890" },
+        { "desc": "测试代理是否生效", "cmd": "curl -I -m 8 https://www.google.com" },
+        { "desc": "给 Flatpak 应用设置代理", "cmd": "flatpak override --user --env=ALL_PROXY=http://127.0.0.1:7890 应用ID" }
+      ]
+    },
+    {
+      "id": "rescue",
+      "title": "系统卡死、黑屏、进不去桌面怎么急救",
+      "category": "rescue",
+      "level": "进阶",
+      "readMinutes": 5,
+      "tags": ["故障", "急救", "TTY"],
+      "summary": "桌面卡死不代表系统挂了：切 TTY、重启显示管理器、必要时进恢复模式。",
+      "body": "**第一步：切到文字终端**\n按 `Ctrl + Alt + F3`（或 F2~F6）进入 TTY，登录后可以继续操作。\n\n**第二步：重启显示管理器**\n- GNOME/Ubuntu：`sudo systemctl restart gdm3`（或 gdm）\n- KDE：`sudo systemctl restart sddm`\n- Xfce/LightDM：`sudo systemctl restart lightdm`\n\n**第三步：查看日志找原因**\n`journalctl -xe --no-pager | tail -50`\n\n**第四步：安全重启**\n`sudo reboot`，或 `sudo systemctl reboot`。尽量别长按电源键。\n\n**进不去系统**\n在 GRUB 菜单选择「Advanced options → recovery mode」，可以：\n- 修复损坏的包（dpkg/apt 修复）\n- 进入 root shell 检查磁盘\n- 用 Timeshift 回滚快照\n\n**磁盘满导致无法登录**\n`df -h` 查看，清理 `/var/log` 或 `~/.cache`。本应用「系统维护」页可以一键清理。\n\n**提醒**\n动手改系统前先创建 Timeshift 快照，能省下大量重装时间。",
+      "commands": [
+        { "desc": "查看最近日志", "cmd": "journalctl -xe --no-pager | tail -50" },
+        { "desc": "重启 GNOME 显示管理器", "cmd": "sudo systemctl restart gdm3" },
+        { "desc": "检查磁盘是否已满", "cmd": "df -h" }
+      ]
+    },
+    {
+      "id": "backup",
+      "title": "备份与快照：折腾前先留后路",
+      "category": "rescue",
+      "level": "入门",
+      "readMinutes": 4,
+      "tags": ["备份", "Timeshift", "数据"],
+      "summary": "系统快照恢复系统，文件备份保护数据，两者不能互相替代。",
+      "body": "**系统快照（Timeshift）**\n记录系统文件状态，出问题可以整体回滚。建议：\n- 修改驱动、内核、桌面环境前手动创建一次\n- 选择 BTRFS 或 RSYNC 模式，存到独立分区\n- 不包含 /home 时可以只回滚系统，保留个人文件\n\n**个人文件备份**\n快照不保护文档，重要资料用：\n- 云盘同步（Nextcloud、坚果云等）\n- `rsync` 到移动硬盘：`rsync -av --delete ~/Documents /media/你的U盘/backup/`\n- 定时任务 `cron` 或 `systemd timer`\n\n**备份哪些目录**\n- `~/.config` 应用配置\n- `~/.local/share` 部分应用数据\n- `~/Documents`、`~/Pictures` 等个人文件\n- 浏览器书签与密码（建议用账号同步）\n\n**恢复**\nTimeshift 在 Live USB 或恢复模式中也能恢复快照。\n\n**原则**\n备份要在另一块盘上；只有一份的备份不叫备份。",
+      "commands": [
+        { "desc": "安装 Timeshift", "cmd": "sudo apt install timeshift" },
+        { "desc": "把文档备份到移动硬盘", "cmd": "rsync -av --delete ~/Documents /media/$USER/备份盘/Documents/" },
+        { "desc": "查看磁盘占用，规划备份空间", "cmd": "df -h" }
+      ]
+    },
+    {
+      "id": "updates",
+      "title": "系统更新与内核：该不该频繁升级",
+      "category": "software",
+      "level": "进阶",
+      "readMinutes": 4,
+      "tags": ["更新", "内核", "升级"],
+      "summary": "安全更新要及时，大版本升级要谨慎，Arch 滚动更新更要看公告。",
+      "body": "**Debian/Ubuntu**\n- `sudo apt update && sudo apt upgrade` 常规更新\n- 大版本升级（如 22.04 → 24.04）用 `do-release-upgrade`，升级前备份\n- 内核更新后建议重启；旧内核占用空间可在清理时删除\n\n**Arch 系**\n- 滚动更新，`sudo pacman -Syu` 前先看 Arch 官网 News\n- 更新后重启，不要长期不更新（部分更新最容易坏系统）\n- 内核与驱动版本要匹配\n\n**Fedora**\n- `sudo dnf upgrade`，跨版本用 `dnf system-upgrade`\n\n**什么时候别急着升级**\n- 有重要工作在跑\n- 显卡驱动、专业软件对新内核兼容性未知\n- 先看社区反馈，再决定\n\n**驱动**\nNVIDIA 用户更新内核后可能需要重建模块（DKMS 会自动处理，失败时看 `dkms status`）。\n\n本应用的「系统维护」可以查看可升级包并一键升级。",
+      "commands": [
+        { "desc": "查看可升级的包（Debian/Ubuntu）", "cmd": "apt list --upgradable" },
+        { "desc": "查看可升级的包（Arch）", "cmd": "pacman -Qu" },
+        { "desc": "查看内核版本", "cmd": "uname -r" }
+      ]
+    },
+    {
+      "id": "windows-apps",
+      "title": "Windows 软件在 Linux 上怎么用",
+      "category": "start",
+      "level": "进阶",
+      "readMinutes": 5,
+      "tags": ["Wine", "虚拟机", "Windows软件"],
+      "summary": "优先找 Linux 原生替代；必须用 Windows 软件时，按「Web 版 → Wine/Bottles → 虚拟机」的顺序尝试。",
+      "body": "**先找替代品**\n- Office → LibreOffice / ONLYOFFICE / 网页版 Office\n- Photoshop → GIMP / Krita / 网页版 Photopea\n- 微信/QQ → 官方 Linux 版或网页版\n- 迅雷 → qBittorrent / Motrix\n\n**必须用原版 Windows 软件时**\n1. **网页版**：企业软件大多有 Web 端，最省事\n2. **Wine / Bottles**：适合中小型软件与游戏，Bottles 提供图形化环境管理\n3. **Steam + Proton**：Windows 游戏的首选\n4. **虚拟机**（VirtualBox / VMware / KVM）：兼容性最好，但吃资源\n5. **双系统**：只在确实无法替代时考虑\n\n**注意**\n- 生产力软件（如 Adobe 全家桶）在 Wine 下体验通常不好\n- 涉及硬件加密狗的软件基本只能虚拟机\n- 安装 Windows 软件时注意来源安全\n\n本应用应用市场提供 Wine 与 Bottles 的一键安装。",
+      "commands": [
+        { "desc": "安装 Wine", "cmd": "sudo apt install -y wine" },
+        { "desc": "安装虚拟机管理器（VirtualBox）", "cmd": "sudo apt install -y virtualbox" },
+        { "desc": "查看 CPU 是否支持虚拟化", "cmd": "grep -E -c '(vmx|svm)' /proc/cpuinfo" }
+      ]
+    }
+  ]
+}
