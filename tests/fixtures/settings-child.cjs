@@ -2,6 +2,18 @@
 'use strict';
 
 // 在隔离的临时家目录中运行，避免触碰开发者真实配置。
+
+// 纯 Node 环境下 require('electron') 会触发二进制的懒下载（打印到 stdout），
+// 这里直接 stub 掉，保证本进程只输出 JSON。
+const Module = require('node:module');
+const originalLoad = Module._load;
+Module._load = function (request, ...rest) {
+  if (request === 'electron') {
+    return { net: { fetch: async () => ({}) }, session: { defaultSession: {} } };
+  }
+  return originalLoad.call(this, request, ...rest);
+};
+
 const settings = require('../../src/main/lib/settings');
 
 const mode = process.argv[2] || 'read';
