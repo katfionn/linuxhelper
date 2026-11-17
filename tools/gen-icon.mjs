@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 生成应用图标 build/icon.png（1024×1024，无第三方依赖）。
+ * 生成应用图标：build/icon.png（1024×1024）与 build/icons/（16~1024 多尺寸），无第三方依赖。
  * 纯 Node 光栅化：圆角底板 + 渐变光晕 + 终端提示符 ">_"。
  * 用法：npm run icon
  */
@@ -139,28 +139,79 @@ function chunk(type, data) {
   return Buffer.concat([len, body, crc]);
 }
 
-const ihdr = Buffer.alloc(13);
-ihdr.writeUInt32BE(SIZE, 0);
-ihdr.writeUInt32BE(SIZE, 4);
-ihdr[8] = 8; // bit depth
-ihdr[9] = 6; // RGBA
-ihdr[10] = 0;
-ihdr[11] = 0;
-ihdr[12] = 0;
+function encodePng(pixels, size) {
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(size, 0);
+  ihdr.writeUInt32BE(size, 4);
+  ihdr[8] = 8; // bit depth
+  ihdr[9] = 6; // RGBA
+  ihdr[10] = 0;
+  ihdr[11] = 0;
+  ihdr[12] = 0;
 
-const raw = Buffer.alloc((SIZE * 4 + 1) * SIZE);
-for (let y = 0; y < SIZE; y++) {
-  raw[y * (SIZE * 4 + 1)] = 0; // filter none
-  rgba.copy(raw, y * (SIZE * 4 + 1) + 1, y * SIZE * 4, (y + 1) * SIZE * 4);
+  const raw = Buffer.alloc((size * 4 + 1) * size);
+  for (let y = 0; y < size; y++) {
+    raw[y * (size * 4 + 1)] = 0; // filter none
+    pixels.copy(raw, y * (size * 4 + 1) + 1, y * size * 4, (y + 1) * size * 4);
+  }
+
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    chunk('IHDR', ihdr),
+    chunk('IDAT', deflateSync(raw, { level: 9 })),
+    chunk('IEND', Buffer.alloc(0))
+  ]);
 }
 
-const png = Buffer.concat([
-  Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-  chunk('IHDR', ihdr),
-  chunk('IDAT', deflateSync(raw, { level: 9 })),
-  chunk('IEND', Buffer.alloc(0))
-]);
+/** 面积平均降采样；按预乘 alpha 加权，避免边缘发黑 */
+function downsample(src, srcSize, dstSize) {
+  const dst = Buffer.alloc(dstSize * dstSize * 4);
+  const scale = srcSize / dstSize;
+  for (let y = 0; y < dstSize; y++) {
+    const y0 = Math.floor(y * scale);
+    const y1 = Math.min(srcSize, Math.ceil((y + 1) * scale));
+    for (let x = 0; x < dstSize; x++) {
+      const x0 = Math.floor(x * scale);
+      const x1 = Math.min(srcSize, Math.ceil((x + 1) * scale));
+      let a = 0;
+      let r = 0;
+      let g = 0;
+      let b = 0;
+      let n = 0;
+      for (let sy = y0; sy < y1; sy++) {
+        for (let sx = x0; sx < x1; sx++) {
+          const i = (sy * srcSize + sx) * 4;
+          const al = src[i + 3] / 255;
+          a += al;
+          r += src[i] * al;
+          g += src[i + 1] * al;
+          b += src[i + 2] * al;
+          n++;
+        }
+      }
+      const di = (y * dstSize + x) * 4;
+      if (a > 0) {
+        dst[di] = Math.round(r / a);
+        dst[di + 1] = Math.round(g / a);
+        dst[di + 2] = Math.round(b / a);
+      }
+      dst[di + 3] = Math.round((a / n) * 255);
+    }
+  }
+  return dst;
+}
+
+// 主图 + hicolor 各尺寸图标集（electron-builder 按尺寸逐个安装到 /usr/share/icons/hicolor/NxN/apps/）
+const SIZES = [16, 24, 32, 48, 64, 128, 256, 512, 1024];
 
 mkdirSync(dirname(OUT), { recursive: true });
-writeFileSync(OUT, png);
-console.log(`icon written: ${OUT} (${(png.length / 1024).toFixed(1)} KB)`);
+writeFileSync(OUT, encodePng(rgba, SIZE));
+
+const ICON_DIR = join(dirname(OUT), 'icons');
+mkdirSync(ICON_DIR, { recursive: true });
+for (const size of SIZES) {
+  const pixels = size === SIZE ? rgba : downsample(rgba, SIZE, size);
+  writeFileSync(join(ICON_DIR, `${size}x${size}.png`), encodePng(pixels, size));
+}
+
+console.log(`已生成 build/icon.png 与 build/icons/（${SIZES.join(', ')}）`);
