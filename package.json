@@ -55,8 +55,9 @@
         "from": "build/icon.png",
         "to": "icon.png"
       },
-      { "from": "LICENSE",
-      "to": "LICENSE"
+      {
+        "from": "LICENSE",
+        "to": "LICENSE"
       }
     ],
     "linux": {
@@ -99,7 +100,6 @@
       "syncDesktopName": true
     },
     "deb": {
-      "afterInstall": "build/after-install.sh",
       "depends": [
         "libgtk-3-0",
         "libnotify4",
