@@ -19,7 +19,7 @@
     "test": "node --test",
     "smoke": "node tools/smoke.mjs",
     "icon": "node tools/gen-icon.mjs",
-    "dist:linux": "npm run icon && electron-builder --linux AppImage deb pacman",
+    "dist:linux": "npm run icon && electron-builder --linux",
     "dist:dir": "electron-builder --dir",
     "env:status": "node tools/envpack.mjs status",
     "env:pack": "node tools/envpack.mjs pack",
