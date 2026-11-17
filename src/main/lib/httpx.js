@@ -1,11 +1,17 @@
 // SPDX-License-Identifier: MPL-2.0
 'use strict';
 
-const { net, session } = require('electron');
+// electron 只在真正发请求时才加载：纯 Node 环境（单元测试）不该触发它的二进制懒下载。
+let electronApi = null;
+function getElectron() {
+  if (!electronApi) electronApi = require('electron');
+  return electronApi;
+}
 
 const MAX_BODY = 6 * 1024 * 1024;
 
 async function applyProxy(url) {
+  const { session } = getElectron();
   const target = session.defaultSession;
   try {
     if (url) {
@@ -29,6 +35,7 @@ async function request(url, options = {}) {
   const onAbort = () => controller.abort();
   if (signal) signal.addEventListener('abort', onAbort);
   try {
+    const { net } = getElectron();
     const res = await net.fetch(url, {
       method,
       headers,
