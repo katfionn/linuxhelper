@@ -19,7 +19,7 @@
     "test": "node --test",
     "smoke": "node tools/smoke.mjs",
     "icon": "node tools/gen-icon.mjs",
-    "dist:linux": "electron-builder --linux AppImage deb pacman",
+    "dist:linux": "npm run icon && electron-builder --linux AppImage deb pacman",
     "dist:dir": "electron-builder --dir",
     "env:status": "node tools/envpack.mjs status",
     "env:pack": "node tools/envpack.mjs pack",
@@ -83,7 +83,7 @@
         }
       ],
       "category": "Utility",
-      "icon": "build/icon.png",
+      "icon": "build/icons",
       "synopsis": "面向 Windows 转 Linux 用户的 AI 桌面助手",
       "description": "Linux 使用助手：知识库、每日技巧、应用市场、文件查找、个性化与 AI 系统管理，所有缓存与依赖都保存在用户家目录内。",
       "maintainer": "WuRong katfionn.git@ccmail.uk",
@@ -99,6 +99,7 @@
       "syncDesktopName": true
     },
     "deb": {
+      "afterInstall": "build/after-install.sh",
       "depends": [
         "libgtk-3-0",
         "libnotify4",
