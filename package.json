@@ -1,6 +1,7 @@
 {
   "name": "linux-assistant",
   "productName": "LinuxHelper",
+  "desktopName": "linuxhelper.desktop",
   "version": "0.1.0",
   "description": "Linux 使用助手 — 面向 Windows 转 Linux 用户的 AI 桌面客户端",
   "main": "src/main/main.js",
@@ -94,7 +95,8 @@
           "Categories": "Utility;System;"
         }
       },
-      "executableName": "linuxhelper"
+      "executableName": "linuxhelper",
+      "syncDesktopName": true
     },
     "deb": {
       "depends": [
