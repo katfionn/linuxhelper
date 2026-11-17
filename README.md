@@ -24,6 +24,10 @@
   <a href="#测试">测试</a>
 </p>
 
+<p align="center">
+  <a href="https://github.com/katfionn/linuxhelper/tree/build">项目处于开发阶段，MVP版本请前往Build分支查看</a> 
+</p>
+
 ---
 
 ## 这是什么
