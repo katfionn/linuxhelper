@@ -37,6 +37,9 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Install packaging prerequisites
+        run: sudo apt-get update && sudo apt-get install -y libarchive-tools
+
       - name: Cache electron-builder downloads
         uses: actions/cache@v4
         with:
